@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>canvasGame.js</title>
+	<link rel="stylesheet" type="text/css" href="./layout/css/style.css">
+</head>
+<body>
+	<div>
+		<canvas id="viewport"></canvas>
+		<section class="assets">
+			<h1>Assets:</h1>
+			<div class="assets-grid">
+				<img class="sprite" id="ground" src="./images/ground.png">
+				<img class="sprite" id="underground" src="./images/underground.png">
+				<img class="sprite" id="void" src="./images/void.png">
+				<img class="sprite" id="player" src="./images/player.png">
+			</div>		
+		</section>
+	</div>
+	<div>
+		<ul class="info">
+			<li>FPS:<br><span id="framerate"></span></li>
+			<li>Last Key:<br><span id="lastkey">Null</span></li>
+			<li>Debug: <br><span id="debug"></span></li>
+		</ul>
+	</div>
+	<script type="text/javascript" src="./js/game.js"></script>
+</body>
+</html>
