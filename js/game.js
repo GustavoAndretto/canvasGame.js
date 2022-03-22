@@ -1,106 +1,126 @@
-(function () {
-    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-    window.requestAnimationFrame = requestAnimationFrame;
-})();
+(function () { var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame; window.requestAnimationFrame = requestAnimationFrame; })();
 
-var viewport = document.getElementById('viewport');
-var context = viewport.getContext('2d');
+class Object {
+    constructor(posX, posY, width, height, sprite) {
+        this.posX = posX;
+        this.posY = posY;
+        this.wdth = width;
+        this.height = height;
+        this.sprite = document.getElementById(sprite);
+    }
 
-var fps = document.getElementById('framerate');
-var dbg = document.getElementById('debug');
+    move(posX, posY) {
+        this.posX = posX;
+        this.posY = posY;
+    }
 
-var keys = [];
-
-var previousDelta = 0;
-
-var player = {
-    posX: 0,
-    posY: 0,
-    speedX: 4,
-    speedY: 4,
-    maxJumpHeight: 50,
-    jumpSpeed: 10,
-    jumping: false,
-    walking: false,
-	spriteObj: document.getElementById('player')
+    draw(viewport) {
+        viewport.drawImage(this.sprite, this.posX, this.posY, this.width, this.height);
+    }
 }
 
-function start() {
-    viewport.width = 600;
-    viewport.height = 400;
-
-    player.posX = (viewport.width / 2) - (32 / 2);
-    player.posY = (viewport.height - 32);
-
-    window.addEventListener('load', update);
-
-    document.body.addEventListener('keydown', function (e) {
-        keys[e.keyCode] = true;
-        document.getElementById('lastkey').innerHTML = e.key + "(down)";
-    });
-    
-    document.body.addEventListener('keyup', function (e) {
-        keys[e.keyCode] = false;
-        document.getElementById('lastkey').innerHTML = e.key + "(up)";
-    });
+class Player extends Object {
+    constructor() {
+        this.speedX = 4;
+        this.speedY = 4;
+        this.jumpMaxHeight = 150;
+        this.jumpSpeed = 10;
+        this.jumping = false;
+        this.walking = false;
+    }
 }
 
-function update(currentDelta) {
+class Scene {
+    constructor() {
 
-    var deltaTime = currentDelta - previousDelta;
-
-    // z button = 90
-    if(keys[90] == true) { // jump
-        player.jumping = true;
-    }
-    else if(keys[90] == false) {
-        player.jumping = false;
     }
 
-    if(player.jumping) {
-        player.posY -= player.jumpSpeed;
+    draw(viewport) {
+
     }
-    else {
-        player.posY += player.jumpSpeed;
-    }
-
-    // Horizontal Position
-    if(keys[39] == true) { // arrow right
-        player.posX += player.speedX;
-    }
-    else if(keys[37] == true) { // arrow left
-        player.posX -= player.speedX;
-    }
-
-    // Lock object position inside viewport (Horizontal)
-    if(player.posX < 0) {
-        player.posX = 0;
-    }
-    else if(player.posX > viewport.width - 32) {
-        player.posX = viewport.width - 32;
-    }
-
-    // Lock object position inside viewport (Vertical)
-    if(player.posY < 0) {
-        player.posY = 0;
-    }
-    else if(player.posY > viewport.height - 32) {
-        player.posY = viewport.height - 32;
-    }
-
-	// Clears viewport before redraw
-    context.clearRect(0, 0, viewport.width, viewport.height);
-
-    // Draw player
-    context.drawImage(player.spriteObj, player.posX, player.posY, 32, 32);
-
-    dbg.innerHTML = player.posX;
-
-    fps.innerHTML = Math.floor((1 / deltaTime) * 1000) + " ("+ deltaTime.toFixed(2) + "ms)";
-
-    previousDelta = currentDelta;
-
-    requestAnimationFrame(update);
 }
 
-start();
+class Viewport {
+    constructor(width, height, id) {
+        this.width = width;
+        this.height = height;
+        this.id = id;
+        this.fps = 0;
+        this.latency = 0;
+        this.previousDelta = 0;
+        this.canvas = document.getElementById(id);
+        this.context = this.canvas.getContext('2d');
+
+        this.canvas.width = width;
+        this.canvas.height = height;
+    }
+
+    setFramerateHtmlElement(id) {
+        this.fpsElement = document.getElementById(id);
+    }
+
+    updateFramerateHtmlElement() {
+        this.fpsElement.innerHTML = this.fps + " (" + this.ms + "ms)";
+    }
+
+    getFramerate() {
+        return this.fps;
+    }
+
+    getLatency() {
+        return this.latency;
+    }
+
+    update(delta) {
+        // Store Latency(dt - d0)
+        this.latency = (delta - this.previousDelta).toFixed(2);
+
+        // Store Framerate of viewport
+        this.fps = Math.floor((1 / this.latency) * 1000);
+
+        // TODO: Draw Scene
+
+        // Store previous Delta
+        this.previousDelta = delta;
+    }
+}
+
+class Application {
+    constructor() {
+        // Initialize Viewport
+        this.viewport = new Viewport(600, 400, 'viewport');
+ 
+        // Set HTML Element to display Viewport framerate
+        this.viewport.setFramerateHtmlElement('framerate');
+
+        // Set HTML Element to display Last Key pressed
+        this.setLastKeyHtmlElement('lastkey');
+    }
+
+    keyEvent(key, pressed) {
+
+    }
+
+    setLastKeyHtmlElement(id) {
+        this.keyElement = document.getElementById(id);
+    }
+
+    start() {
+        // Initialize Application.update()
+        this.update(this.previousDelta);
+
+        // Bind Key event listener
+        document.body.addEventListener('keydown', (e) => { this.keyEvent(e, true); });
+        document.body.addEventListener('keyup', (e) => { this.keyEvent(e, false); });
+    }
+
+    update(delta) {
+        // Update Viewport
+        this.viewport.update(delta);
+
+        // Tells the browser that there are frames to update in the current window
+        requestAnimationFrame((delta) => { this.update(delta); });
+    }
+}
+
+(new Application()).start();
